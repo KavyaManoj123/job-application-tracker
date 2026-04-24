@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const jobSchema = new mongoose.Schema(
   {
@@ -12,9 +12,17 @@ const jobSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Applied", "Screening", "Interview", "Offer", "Rejected"],
-      default: "Applied",
+      enum: [
+        'Bookmarked',
+        'Applied',
+        'Interview',
+        'Offer',
+        'Accepted',
+        'Rejected',
+      ],
+      default: 'Bookmarked',
     },
+
     appliedDate: {
       type: Date,
       default: Date.now,
@@ -25,4 +33,4 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Job", jobSchema);
+export default mongoose.model('Job', jobSchema);
