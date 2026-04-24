@@ -4,22 +4,32 @@ import { useJobs } from '../hooks/useJobs';
 import Dashboard from './Dashboard';
 
 const Jobs = () => {
-  const { jobs, addJob, editJob, removeJob } = useJobs();
+  const { jobs, addJob, editJob, removeJob, loading } = useJobs();
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-3">Job Tracker</h2>
-      <Dashboard />
-      <JobForm onAdd={addJob} />
+    <div className="jobs-page">
+      <div className="jobs-shell">
+        <Dashboard jobs={jobs} loading={loading} />
+        <JobForm onAdd={addJob} />
 
-      {jobs.map(job => (
-        <JobCard
-          key={job._id}
-          job={job}
-          onDelete={removeJob}
-          onStatusChange={(id, status) => editJob(id, { status })}
-        />
-      ))}
+        <section className="job-list-section">
+          <div className="section-header">
+            <h2 className="section-title mb-0">My Jobs</h2>
+            <span className="job-count-badge">{jobs.length}</span>
+          </div>
+
+          <div className="job-list">
+            {jobs.map(job => (
+              <JobCard
+                key={job._id}
+                job={job}
+                onDelete={removeJob}
+                onStatusChange={(id, status) => editJob(id, { status })}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

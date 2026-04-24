@@ -1,52 +1,48 @@
-import { useEffect } from "react";
-import { useJobs } from "../hooks/useJobs";
+import { JOB_STATUSES } from '../constants/jobStatuses';
 
-const Dashboard = () => {
-  const { jobs, fetchJobs } = useJobs();
+const normalizeStatus = status => {
+  const normalized = (status || '').trim().toLowerCase();
 
-  // Auto refresh every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchJobs();
-    }, 10000);
+  const statusMap = {
+    bookmarked: 'Bookmarked',
+    applied: 'Applied',
+    screening: 'Applied',
+    interview: 'Interview',
+    interviewing: 'Interview',
+    offer: 'Offer',
+    accepted: 'Accepted',
+    rejected: 'Rejected',
+  };
 
-    return () => clearInterval(interval);
-  }, []);
+  return statusMap[normalized] || 'Applied';
+};
 
-  const total = jobs.length;
-  const interviews = jobs.filter(j => j.status === "Interview").length;
-  const offers = jobs.filter(j => j.status === "Offer").length;
+const Dashboard = ({ jobs = [], loading = false }) => {
+  const counts = JOB_STATUSES.reduce((acc, status) => {
+    acc[status] = 0;
+    return acc;
+  }, {});
+
+  jobs.forEach(job => {
+    counts[normalizeStatus(job.status)] += 1;
+  });
 
   return (
-    <div className="container mt-3">
-      <div className="row g-3">
-        
-        {/* Total */}
-        <div className="col-4">
-          <div className="card text-white bg-primary shadow-sm text-center p-3">
-            <h6 className="mb-1">Total</h6>
-            <h3>{total}</h3>
-          </div>
-        </div>
-
-        {/* Interviews */}
-        <div className="col-4">
-          <div className="card text-dark bg-warning shadow-sm text-center p-3">
-            <h6 className="mb-1">Interviews</h6>
-            <h3>{interviews}</h3>
-          </div>
-        </div>
-
-        {/* Offers */}
-        <div className="col-4">
-          <div className="card text-white bg-success shadow-sm text-center p-3">
-            <h6 className="mb-1">Offers</h6>
-            <h3>{offers}</h3>
-          </div>
-        </div>
-
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-header">
+        <h2 className="dashboard-title mb-0">Job Tracker</h2>
+        <span className="dashboard-meta">{loading ? 'Loading...' : jobs.length}</span>
       </div>
-    </div>
+
+      <div className="status-strip" role="list" aria-label="Job summary">
+        {JOB_STATUSES.map(status => (
+          <article key={status} role="listitem" className="status-card">
+            <span className="status-count">{counts[status]}</span>
+            <span className="status-label">{status}</span>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 };
 

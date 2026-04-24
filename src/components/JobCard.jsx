@@ -1,96 +1,88 @@
 import { useMemo } from 'react';
+import { JOB_STATUSES, STATUS_COLORS } from '../constants/jobStatuses';
 
-const statusColors = {
-  Applied: '#6c757d',
-  Screening: '#0d6efd',
-  Interview: '#ffc107',
-  Offer: '#198754',
-  Rejected: '#dc3545',
+const normalizeStatus = status => {
+  const statusMap = {
+    Screening: 'Applied',
+    Interviewing: 'Interview',
+  };
+
+  return statusMap[status] || status || 'Applied';
 };
 
 const JobCard = ({ job, onDelete, onStatusChange }) => {
-  // Format date nicely
+  const normalizedStatus = useMemo(
+    () => normalizeStatus(job.status),
+    [job.status]
+  );
+
   const formattedDate = useMemo(() => {
     if (!job.appliedDate) return 'N/A';
 
-    return new Date(job.appliedDate).toLocaleString('en-IN', {
+    return new Date(job.appliedDate).toLocaleDateString('en-IN', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   }, [job.appliedDate]);
 
-  const statusColor = statusColors[job.status] || '#6c757d';
+  const statusColor = STATUS_COLORS[normalizedStatus] || '#4f6d8a';
 
   return (
-    <div
-      className="card mb-3 shadow-sm p-2"
-      style={{
-        borderLeft: `6px solid ${statusColor}`,
-        borderRadius: '10px',
-      }}
+    <article
+      className="job-card"
+      style={{ borderLeft: `4px solid ${statusColor}` }}
     >
-      <div className="card-body p-1">
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-start mb-2">
-          <div>
-            <h5 className="mb-1">{job.company}</h5>
-            <p className="mb-0 text-muted">{job.role}</p>
+      <div className="job-card-body">
+        <div className="job-card-header">
+          <div className="job-card-main">
+            <h3 className="job-company mb-1">{job.company}</h3>
+            <p className="job-role mb-0">{job.role}</p>
           </div>
-
-          <span
-            style={{
-              background: statusColor,
-              color: '#fff',
-              padding: '4px 10px',
-              borderRadius: '20px',
-              fontSize: '12px',
-            }}
-          >
-            {job.status}
-          </span>
+          <div className='job-card-rigth'>
+            <p className="job-date">{formattedDate}</p>
+            <span
+              className="job-status-pill"
+              style={{ background: statusColor }}
+            >
+              {normalizedStatus}
+            </span>
+          </div>
         </div>
 
-        {/* Date */}
-        <p className="text-muted mb-2" style={{ fontSize: '13px' }}>
-          Applied on: {formattedDate}
-        </p>
+        <div className="job-card-bottom">
+          <div className="job-card-controls">
+            <select
+              className="form-select job-status-select"
+              value={normalizedStatus}
+              onChange={e => onStatusChange(job._id, e.target.value)}
+            >
+              {JOB_STATUSES.map(status => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
 
-        {/* Status Dropdown */}
-        <select
-          className="form-select mb-3"
-          value={job.status}
-          onChange={e => onStatusChange(job._id, e.target.value)}
-        >
-          <option>Applied</option>
-          <option>Screening</option>
-          <option>Interview</option>
-          <option>Offer</option>
-          <option>Rejected</option>
-        </select>
+            <div className="job-card-actions">
+              <a
+                href={job.jobLink}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-outline-primary btn-xs job-action-btn"
+              >
+                Link
+              </a>
 
-        {/* Actions */}
-        <div className="d-flex justify-content-between align-items-center">
-          <a
-            href={job.jobLink}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-outline-primary btn-sm"
-          >
-            🔗 View Job
-          </a>
-
-          <button
-            onClick={() => onDelete(job._id)}
-            className="btn btn-outline-danger btn-sm"
-          >
-            🗑 Delete
-          </button>
+              <button
+                onClick={() => onDelete(job._id)}
+                className="btn btn-outline-danger btn-xs job-action-btn"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
